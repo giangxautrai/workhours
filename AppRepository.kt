@@ -15,9 +15,7 @@ import kotlin.math.max
 class AppRepository(context: Context) {
     private val dbHelper = DatabaseHelper(context)
 
-    // =========================================
-    // ACCOUNT OPERATIONS
-    // =========================================
+
 
     fun authenticate(username: String, password: String): Account? {
         val db = dbHelper.readableDatabase
@@ -60,9 +58,6 @@ class AppRepository(context: Context) {
         return null
     }
 
-    // =========================================
-    // EMPLOYEE OPERATIONS
-    // =========================================
 
     fun getAllEmployees(query: String = ""): List<Employee> {
         val list = mutableListOf<Employee>()
@@ -158,7 +153,7 @@ class AppRepository(context: Context) {
         val db = dbHelper.writableDatabase
         db.beginTransaction()
         try {
-            // Insert Account
+ 
             val accValues = ContentValues().apply {
                 put(DatabaseHelper.ACCOUNT_USERNAME, username)
                 put(DatabaseHelper.ACCOUNT_PASSWORD, password)
@@ -167,7 +162,6 @@ class AppRepository(context: Context) {
             val accId = db.insert(DatabaseHelper.TABLE_ACCOUNT, null, accValues)
             if (accId == -1L) return false
 
-            // Insert Employee
             val empValues = ContentValues().apply {
                 put(DatabaseHelper.EMP_CODE, code)
                 put(DatabaseHelper.EMP_FULLNAME, fullname)
@@ -234,9 +228,6 @@ class AppRepository(context: Context) {
         }
     }
 
-    // =========================================
-    // WORK LOG & ATTENDANCE OPERATIONS
-    // =========================================
 
     fun getTodayWorkLog(employeeId: Long, todayDate: String): WorkLog? {
         val db = dbHelper.readableDatabase
@@ -394,10 +385,6 @@ class AppRepository(context: Context) {
         }
     }
 
-    // =========================================
-    // SALARY OPERATIONS
-    // =========================================
-
     fun calculateAndSaveSalary(month: Int, year: Int): Int {
         val employees = getAllEmployees()
         val db = dbHelper.writableDatabase
@@ -417,18 +404,14 @@ class AppRepository(context: Context) {
 
             for (log in workLogs) {
                 totalHours += log.totalHours
-                // Daily overtime threshold (e.g. > 8 hours)
+                
                 if (log.totalHours > 8.0) {
                     overtimeHours += (log.totalHours - 8.0)
                 }
             }
 
-            // Regular hours = total - daily overtime
             val regularHours = max(0.0, totalHours - overtimeHours)
-            // Overtime hours paid at 1.5x rate
             val totalSalary = (regularHours * emp.hourlyRate) + (overtimeHours * emp.hourlyRate * 1.5)
-
-            // Check if salary record already exists
             val cursor = db.query(
                 DatabaseHelper.TABLE_SALARY,
                 null,
